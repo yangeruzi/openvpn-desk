@@ -1,0 +1,52 @@
+/* General window */
+window {
+    background-color: #f9fafb;
+}
+
+
+/* TreeView */
+treeview {
+    border-radius: 8px;
+    padding: 6px;
+}
+
+/* Status label */
+.status-label {
+    font-weight: 600;
+    padding-top: 6px;
+}
+
+/* Speed label */
+.speed-label {
+    color: #2563eb;
+    font-weight: 500;
+}
+
+/* Buttons */
+/* Base button styling */
+button {
+    border-radius: 8px;
+    padding: 6px 14px;
+}
+
+/* Connect (Suggested action) */
+button.suggested-action {
+    background-color: #16a34a;
+    color: white;
+    background-image: none;
+    box-shadow: none;
+}
+
+/* Disconnect (Destructive action) */
+button.destructive-action {
+    background-color: #dc2626;
+    color: white;
+    background-image: none;
+    box-shadow: none;
+}
+
+/* Disabled state */
+button:disabled {
+    background-color: #d1d5db;
+    color: #9ca3af;
+}

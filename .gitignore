@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+
+# Packaging output
+build/
+*.deb
+
+# Editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
