@@ -1,3 +1,7 @@
+![Platform](https://img.shields.io/badge/platform-Linux-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+
+
 OpenVPN Desk
 
 OpenVPN Desk is a lightweight, GTK-based OpenVPN client for Linux, designed for users who want a simple, reliable GUI without relying on NetworkManager or OpenVPN 3.
@@ -8,37 +12,37 @@ It is built on OpenVPN 2.x, systemd, and polkit, and works especially well on Ub
 
 ✨ Features
 
-✅ Simple GTK desktop interface
+    ✅ Simple GTK desktop interface
 
-✅ Import .ovpn profiles via GUI
+    ✅ Import .ovpn profiles via GUI
 
-✅ Secure credential handling (root-only auth files)
+    ✅ Secure credential handling (root-only auth files)
 
-✅ systemd-managed connections (openvpn@profile)
+    ✅ systemd-managed connections (openvpn@profile)
 
-✅ One VPN active at a time (safe by design)
+    ✅ One VPN active at a time (safe by design)
 
-✅ Live connection status
+    ✅ Live connection status
 
-✅ Upload / download speed indicator
+    ✅ Upload / download speed indicator
 
-✅ No tray clutter (v1 focus on stability)
+    ✅ No tray clutter (v1 focus on stability)
 
-✅ No NetworkManager dependency
+    ✅ No NetworkManager dependency
 
 -----------------------------------------------------------------
 
 🚫 What This Is Not
 
-❌ Not based on NetworkManager
+    ❌ Not based on NetworkManager
 
-❌ Not using OpenVPN 3
+    ❌ Not using OpenVPN 3
 
-❌ Not a tray-only app
+    ❌ Not a tray-only app
 
-❌ Not storing credentials in user space
+    ❌ Not storing credentials in user space
 
-❌ Not affiliated with OpenVPN Inc.
+    ❌ Not affiliated with OpenVPN Inc.
 
 This project exists because many Linux users need a simple OpenVPN GUI that works reliably with standard .ovpn profiles.
 
