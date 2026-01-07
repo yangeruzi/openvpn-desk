@@ -16,6 +16,7 @@ class YangzLinuxVpnClient(Gtk.Window):
 
     def __init__(self):
         super().__init__(title="Yangz Open VPN Desk Client")
+
         # Force light theme (disable dark mode)
         settings = Gtk.Settings.get_default()
         if settings:
@@ -25,7 +26,7 @@ class YangzLinuxVpnClient(Gtk.Window):
 
         self.load_css()
         self.set_border_width(12)
-        self.set_default_size(420, 300)
+        self.set_default_size(360, 580)
 
         self.backend = VpnBackend()
         self.selected_profile = None
@@ -46,13 +47,25 @@ class YangzLinuxVpnClient(Gtk.Window):
     # --------------------------------------------------
 
     def _build_ui(self):
+        # Main container
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         self.add(vbox)
 
-        # Header bar
-        header = Gtk.HeaderBar(title="OpenVPN Desk")
-        header.set_show_close_button(True)
-        self.set_titlebar(header)
+        # Custom header bar (COSMIC-safe)
+        header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+        header.set_margin_top(8)
+        header.set_margin_bottom(8)
+        header.set_margin_start(12)
+        header.set_margin_end(12)
+
+        header.get_style_context().add_class("openvpn-header")
+
+        title = Gtk.Label(label="OpenVPN Desk")
+        title.get_style_context().add_class("openvpn-header-title")
+        title.set_xalign(0)
+
+        header.pack_start(title, True, True, 0)
+        vbox.pack_start(header, False, False, 0)
 
 
         # Profile list
@@ -125,6 +138,8 @@ class YangzLinuxVpnClient(Gtk.Window):
         )   
 
         # Mark semantic button roles
+        self.import_btn.get_style_context().add_class("import")
+        self.refresh_btn.get_style_context().add_class("refresh")
         self.connect_btn.get_style_context().add_class("suggested-action")
         self.disconnect_btn.get_style_context().add_class("destructive-action")
 
@@ -251,14 +266,21 @@ class YangzLinuxVpnClient(Gtk.Window):
         dialog = Gtk.Dialog(
             title="VPN Profile Details",
             parent=self,
-            flags=0
+            flags=Gtk.DialogFlags.MODAL
         )
+
+        # Force dialog to use our light styling
+        dialog.get_style_context().add_class("openvpn-dialog")
+        dialog.set_default_size(360, -1)
+
         dialog.add_buttons(
             Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
             Gtk.STOCK_OK, Gtk.ResponseType.OK
         )
 
         content = dialog.get_content_area()
+        content.get_style_context().add_class("openvpn-dialog-content")
+
         grid = Gtk.Grid(column_spacing=10, row_spacing=10, margin=10)
         content.add(grid)
 
@@ -423,8 +445,8 @@ class YangzLinuxVpnClient(Gtk.Window):
                     self.speed_timer_id = GLib.timeout_add_seconds(1, self.update_speed)
 
             else:
-                self.active_profile = None
-                self.status_label.set_text(f"Status: Disconnected ({self.selected_profile})")
+                self.active_profile = self.selected_profile
+                self.status_label.set_text(f"Status: Disconnected ({self.active_profile})")
 
                 self.vpn_iface = None
                 self.speed_label.set_visible(False)
@@ -494,16 +516,23 @@ class YangzLinuxVpnClient(Gtk.Window):
     def on_refresh_clicked(self, button):
         self.refresh_profiles()
 
+class OpenVPNDeskApp(Gtk.Application):
+    def __init__(self):
+        super().__init__(application_id="in.openvpndesk.app")
+
+    def do_activate(self):
+        win = YangzLinuxVpnClient()
+        win.set_application(self)
+        win.show_all()
 
 # --------------------------------------------------
 # Application Entry Point
 # --------------------------------------------------
 
+
 def main():
-    win = YangzLinuxVpnClient()
-    win.connect("destroy", Gtk.main_quit)
-    win.show_all()
-    Gtk.main()
+    app = OpenVPNDeskApp()
+    app.run()
 
 
 if __name__ == "__main__":

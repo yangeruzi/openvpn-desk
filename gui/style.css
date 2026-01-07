@@ -8,20 +8,19 @@ window {
     background-color: #f9fafb;
 }
 
-/* Header bar – force light */
-headerbar {
+/* Custom header (not system headerbar) */
+.openvpn-header {
     background-color: #f3f4f6;
-    color: #111827;
     border-bottom: 1px solid #d1d5db;
+}
+
+/* Header title */
+.openvpn-header-title {
     color: #111827;
+    font-size: 16px;
     font-weight: 600;
 }
 
-/* Header bar title */
-headerbar label {
-    color: #111827;
-    font-weight: 600;
-}
 
 /* Force readable text */
 label {
@@ -38,7 +37,7 @@ treeview {
 
 /* Selected row */
 treeview:selected {
-    background-color: #8d8e90;
+    background-color: #c0d5ff;
     color: #111827;
 }
 
@@ -47,6 +46,19 @@ treeview:selected label,
 treeview:selected text {
     color: #111827;
 }
+
+/* TreeView header */
+treeview header button {
+    background-color: #4e87f9;
+    color: #111827;
+    border-radius: 6px;
+}
+
+treeview header button label {
+    color: #111827;
+    font-weight: 600;
+}
+
 
 
 /* Status label */
@@ -84,8 +96,64 @@ button.destructive-action {
     box-shadow: none;
 }
 
+/* Import button (yellow) */
+button.import {
+    background-color: #f59e0b;
+    color: #111827;
+    background-image: none;
+}
+
+/* Refresh button (blue) */
+button.refresh {
+    background-color: #496cb2;
+    color: #ffffff;
+    background-image: none;
+}
+
+
 /* Disabled state */
 button:disabled {
     background-color: #d1d5db;
     color: #9ca3af;
+}
+
+/* -------- Dialog (Import Profile) -------- */
+
+.openvpn-dialog {
+    background-color: #ffffff;
+}
+
+.openvpn-dialog-content {
+    background-color: #ffffff;
+}
+
+/* Dialog labels */
+.openvpn-dialog label {
+    color: #111827;
+    font-weight: 500;
+}
+
+/* Dialog entries */
+.openvpn-dialog entry {
+    background-color: #ffffff;
+    color: #111827;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 6px;
+}
+
+/* Focused entry */
+.openvpn-dialog entry:focus {
+    border-color: #2563eb;
+}
+
+/* Dialog buttons */
+.openvpn-dialog button {
+    background-color: #e5e7eb;
+    color: #111827;
+    border-radius: 6px;
+}
+
+.openvpn-dialog button:hover {
+    background-color: #d1d5db;
 }
