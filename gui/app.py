@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 import os
+import sys
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, BASE_DIR)
+
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib, Gdk
@@ -11,7 +15,7 @@ from gui.backend import VpnBackend, VpnBackendError
 class YangzLinuxVpnClient(Gtk.Window):
 
     def __init__(self):
-        super().__init__(title="Yangz Linux VPN Client")
+        super().__init__(title="Yangz Open VPN Desk Client")
         # Force light theme (disable dark mode)
         settings = Gtk.Settings.get_default()
         if settings:
