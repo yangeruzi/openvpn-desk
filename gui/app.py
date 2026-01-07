@@ -12,6 +12,13 @@ class YangzLinuxVpnClient(Gtk.Window):
 
     def __init__(self):
         super().__init__(title="Yangz Linux VPN Client")
+        # Force light theme (disable dark mode)
+        settings = Gtk.Settings.get_default()
+        if settings:
+            settings.set_property("gtk-application-prefer-dark-theme", False)
+        
+        self.get_style_context().add_class("openvpn-desk-window")
+
         self.load_css()
         self.set_border_width(12)
         self.set_default_size(420, 300)
@@ -413,7 +420,8 @@ class YangzLinuxVpnClient(Gtk.Window):
 
             else:
                 self.active_profile = None
-                self.status_label.set_text("Status: Disconnected")
+                self.status_label.set_text(f"Status: Disconnected ({self.selected_profile})")
+
                 self.vpn_iface = None
                 self.speed_label.set_visible(False)
                 if self.speed_timer_id is not None:

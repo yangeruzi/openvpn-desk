@@ -3,12 +3,51 @@ window {
     background-color: #f9fafb;
 }
 
+/* Force light window */
+.openvpn-desk-window {
+    background-color: #f9fafb;
+}
+
+/* Header bar – force light */
+headerbar {
+    background-color: #f3f4f6;
+    color: #111827;
+    border-bottom: 1px solid #d1d5db;
+    color: #111827;
+    font-weight: 600;
+}
+
+/* Header bar title */
+headerbar label {
+    color: #111827;
+    font-weight: 600;
+}
+
+/* Force readable text */
+label {
+    color: #111827; /* dark gray */
+}
 
 /* TreeView */
 treeview {
+    color: #111827;
+    background-color: #ffffff;
     border-radius: 8px;
     padding: 6px;
 }
+
+/* Selected row */
+treeview:selected {
+    background-color: #8d8e90;
+    color: #111827;
+}
+
+/* Selected row text */
+treeview:selected label,
+treeview:selected text {
+    color: #111827;
+}
+
 
 /* Status label */
 .status-label {
