@@ -15,7 +15,7 @@ from gui.backend import VpnBackend, VpnBackendError
 class YangzLinuxVpnClient(Gtk.Window):
 
     def __init__(self):
-        super().__init__(title="Yangz Open VPN Desk Client")
+        super().__init__(title="Open VPN Desk Client")
 
         # Force light theme (disable dark mode)
         settings = Gtk.Settings.get_default()

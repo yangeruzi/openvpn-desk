@@ -12,12 +12,13 @@
     <defaults>
       <allow_any>no</allow_any>
       <allow_inactive>no</allow_inactive>
-      <allow_active>auth_admin_keep</allow_active>
+      <allow_active>yes</allow_active>
     </defaults>
 
     <annotate key="org.freedesktop.policykit.exec.path">
-      /usr/lib/yangzvpn/helper.py
+      /usr/lib/openvpn-desk/helper.py
     </annotate>
+
 
     <annotate key="org.freedesktop.policykit.exec.allow_gui">
       true
