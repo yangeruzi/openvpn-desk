@@ -1,0 +1,12 @@
+LICENSE
+README.md
+pyproject.toml
+openvpn_desk.egg-info/PKG-INFO
+openvpn_desk.egg-info/SOURCES.txt
+openvpn_desk.egg-info/dependency_links.txt
+openvpn_desk.egg-info/entry_points.txt
+openvpn_desk.egg-info/requires.txt
+openvpn_desk.egg-info/top_level.txt
+openvpndesk/__init__.py
+openvpndesk/app.py
+openvpndesk/backend.py
