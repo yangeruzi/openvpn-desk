@@ -11,8 +11,6 @@ from typing import List, Dict, Any
 
 
 HELPER_PATH = "/usr/lib/openvpn-desk/helper.py"
-cmd = ["pkexec", HELPER_PATH]
-
 
 
 class VpnBackendError(Exception):

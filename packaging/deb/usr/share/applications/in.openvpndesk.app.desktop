@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=OpenVPN Desk
+Comment=Simple GTK OpenVPN desktop client
+Exec=openvpn-desk
+Icon=openvpn-desk
+Terminal=false
+Categories=Network;
+Keywords=OpenVPN;VPN;Network;Security;
+StartupNotify=true
+StartupWMClass=in.openvpndesk.app

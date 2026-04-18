@@ -1,0 +1,4 @@
+#!/bin/sh
+set -e
+
+exec env PYTHONPATH=/usr/share/openvpn-desk python3 -m openvpndesk.app "$@"

@@ -6,7 +6,7 @@ OpenVPN Desk
 
 OpenVPN Desk is a lightweight, GTK-based OpenVPN client for Linux, designed for users who want a simple, reliable GUI without relying on NetworkManager or OpenVPN 3.
 
-It is built on OpenVPN 2.x, systemd, and polkit, and works especially well on Ubuntu and Pop!_OS.
+It is built on OpenVPN 2.x, a dedicated systemd unit, and polkit, and works especially well on Ubuntu and Pop!_OS.
 
 -----------------------------------------------------------------
 
@@ -18,7 +18,7 @@ It is built on OpenVPN 2.x, systemd, and polkit, and works especially well on Ub
 
     ✅ Secure credential handling (root-only auth files)
 
-    ✅ systemd-managed connections (openvpn@profile)
+    ✅ systemd-managed connections (openvpn-desk@profile)
 
     ✅ One VPN active at a time (safe by design)
 
@@ -68,7 +68,7 @@ Pop!_OS 22.04+
 | GUI             | GTK 3 (PyGObject) |
 | VPN Backend     | OpenVPN 2.x       |
 | Privileges      | polkit / pkexec   |
-| Service Manager | systemd           |
+| Service Manager | dedicated systemd unit |
 | Packaging       | `.deb` (v1)       |
 
 ------------------------------------------------------------------------
@@ -85,11 +85,11 @@ Installing profiles
 
 Creating auth files
 
-Managing systemd services
+Managing the openvpn-desk systemd service
 
-Credentials are stored in: -> /etc/openvpn/<profile>.auth
+Credentials and generated configs are stored in: ` /etc/openvpn-desk/profiles/ `
 
-with chmod 600, root-only access
+with root-only permissions
 
 No passwords are cached or logged by the GUI
 
@@ -97,7 +97,7 @@ No passwords are cached or logged by the GUI
 
 🚀 Installation (v1)
 Prerequisites
-sudo apt install openvpn policykit-1 python3 python3-gi gir1.2-gtk-3.0
+sudo apt install openvpn policykit-1 pkexec python3 python3-gi gir1.2-gtk-3.0
 
 Install the .deb
 sudo dpkg -i openvpn-desk_1.0.0_all.deb
@@ -212,3 +212,8 @@ Doesn’t fight the OS
 Doesn’t hide behind tray icons
 
 Just works
+If you install from source instead of the package:
+
+sudo ./helper/install.sh
+
+No extra group membership or re-login is required; local active users are allowed by polkit.

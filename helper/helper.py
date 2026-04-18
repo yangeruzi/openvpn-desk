@@ -22,7 +22,9 @@ from pathlib import Path
 # Constants & Security Guardrails
 # ==================================================
 
-OPENVPN_DIR = "/etc/openvpn"
+OPENVPN_DESK_DIR = Path("/etc/openvpn-desk")
+PROFILE_DIR = OPENVPN_DESK_DIR / "profiles"
+SERVICE_PREFIX = "openvpn-desk@"
 
 ALLOWED_NAME_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
 
@@ -66,15 +68,19 @@ def validate_profile_name(name: str):
 
 
 def profile_paths(name: str):
-    base = Path(OPENVPN_DIR)
-    conf = base / f"{name}.conf"
-    auth = base / f"{name}.auth"
+    conf = PROFILE_DIR / f"{name}.conf"
+    auth = PROFILE_DIR / f"{name}.auth"
 
     # Prevent traversal / symlink abuse
-    if not conf.resolve().parent.samefile(base):
+    if conf.parent != PROFILE_DIR or auth.parent != PROFILE_DIR:
         emit_error("INVALID_PATH")
 
     return conf, auth
+
+
+def ensure_layout():
+    OPENVPN_DESK_DIR.mkdir(mode=0o750, parents=True, exist_ok=True)
+    PROFILE_DIR.mkdir(mode=0o700, parents=True, exist_ok=True)
 
 
 def systemctl(args):
@@ -111,9 +117,17 @@ def write_conf_file(path: Path, content: str, auth_path: Path):
 
 
 def get_active_vpns():
-    """Return list of active openvpn@*.service profile names."""
+    """Return list of active openvpn-desk@*.service profile names."""
     result = subprocess.run(
-        ["systemctl", "list-units", "--type=service", "--state=active"],
+        [
+            "systemctl",
+            "list-units",
+            f"{SERVICE_PREFIX}*.service",
+            "--type=service",
+            "--state=active",
+            "--plain",
+            "--no-legend",
+        ],
         capture_output=True,
         text=True,
         check=True
@@ -121,7 +135,7 @@ def get_active_vpns():
 
     active = []
     for line in result.stdout.splitlines():
-        if line.startswith("openvpn@") and ".service" in line:
+        if line.startswith(SERVICE_PREFIX) and ".service" in line:
             name = line.split("@", 1)[1].split(".service", 1)[0]
             active.append(name)
     return active
@@ -132,7 +146,8 @@ def get_active_vpns():
 # ==================================================
 
 def handle_list_profiles():
-    profiles = sorted(p.stem for p in Path(OPENVPN_DIR).glob("*.conf"))
+    ensure_layout()
+    profiles = sorted(p.stem for p in PROFILE_DIR.glob("*.conf"))
     emit_ok({"profiles": profiles})
 
 
@@ -147,6 +162,7 @@ def handle_install_profile(data):
     if not ovpn or not username or not password:
         emit_error("MISSING_FIELDS")
 
+    ensure_layout()
     conf_path, auth_path = profile_paths(name)
 
     # Fail-if-exists (locked design decision)
@@ -158,9 +174,6 @@ def handle_install_profile(data):
     write_auth_file(auth_path, username, password)
     write_conf_file(conf_path, sanitized, auth_path)
 
-    systemctl(["daemon-reload"])
-    systemctl(["enable", f"openvpn@{name}"])
-
     emit_ok()
 
 
@@ -168,6 +181,7 @@ def handle_connect(data):
     name = data.get("profile_name")
     validate_profile_name(name)
 
+    ensure_layout()
     conf_path, _ = profile_paths(name)
     if not conf_path.exists():
         emit_error("PROFILE_NOT_FOUND")
@@ -176,7 +190,7 @@ def handle_connect(data):
     if active and name not in active:
         emit_error("ANOTHER_VPN_ACTIVE", "Another VPN is already active")
 
-    systemctl(["start", f"openvpn@{name}"])
+    systemctl(["start", f"{SERVICE_PREFIX}{name}"])
     emit_ok()
 
 
@@ -184,7 +198,7 @@ def handle_disconnect(data):
     name = data.get("profile_name")
     validate_profile_name(name)
 
-    systemctl(["stop", f"openvpn@{name}"])
+    systemctl(["stop", f"{SERVICE_PREFIX}{name}"])
     emit_ok()
 
 
@@ -193,7 +207,7 @@ def handle_status(data):
     validate_profile_name(name)
 
     result = subprocess.run(
-        ["systemctl", "is-active", f"openvpn@{name}"],
+        ["systemctl", "is-active", f"{SERVICE_PREFIX}{name}"],
         capture_output=True,
         text=True
     )

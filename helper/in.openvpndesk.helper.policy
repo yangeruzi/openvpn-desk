@@ -5,9 +5,9 @@
 
 <policyconfig>
 
-  <action id="in.yangz.vpn.helper">
-    <description>Yangz Linux VPN Client</description>
-    <message>Authentication is required to manage VPN connections</message>
+  <action id="in.openvpndesk.helper">
+    <description>OpenVPN Desk privileged helper</description>
+    <message>OpenVPN Desk access is allowed for local users</message>
 
     <defaults>
       <allow_any>no</allow_any>

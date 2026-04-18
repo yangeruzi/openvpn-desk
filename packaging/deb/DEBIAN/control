@@ -1,0 +1,11 @@
+Package: openvpn-desk
+Version: 1.0.0
+Section: net
+Priority: optional
+Architecture: all
+Maintainer: Yanger Longkumer
+Depends: python3, python3-gi, gir1.2-gtk-3.0, openvpn, policykit-1
+Description: Simple GTK OpenVPN desktop client
+ OpenVPN Desk is a lightweight GTK client for importing, connecting,
+ and disconnecting OpenVPN profiles through a polkit-allowed helper and
+ dedicated systemd service.

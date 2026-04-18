@@ -1,10 +1,27 @@
 #!/bin/bash
 set -e
 
-echo "[+] Installing YangzLinuxVpnClient helper"
+if [[ $EUID -ne 0 ]]; then
+    echo "Run this installer as root."
+    exit 1
+fi
 
-install -Dm755 helper.py /usr/lib/yangzvpn/helper.py
-install -Dm644 policy.xml /usr/share/polkit-1/actions/in.yangz.vpn.helper.policy
+INSTALL_USER="${SUDO_USER:-}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+echo "[+] Installing OpenVPN Desk helper"
+
+install -d -m755 -o root -g root /etc/openvpn-desk
+install -d -m700 -o root -g root /etc/openvpn-desk/profiles
+
+install -Dm755 "${SCRIPT_DIR}/helper.py" /usr/lib/openvpn-desk/helper.py
+install -Dm644 "${SCRIPT_DIR}/in.openvpndesk.helper.policy" /usr/share/polkit-1/actions/in.openvpndesk.helper.policy
+install -Dm644 "${SCRIPT_DIR}/49-openvpn-desk.rules" /etc/polkit-1/rules.d/49-openvpn-desk.rules
+install -Dm644 "${SCRIPT_DIR}/openvpn-desk@.service" /etc/systemd/system/openvpn-desk@.service
+
+systemctl daemon-reload
 
 echo "[+] Installation complete."
-echo "You may need to log out and log back in for polkit to refresh."
+if [[ -n "${INSTALL_USER}" && "${INSTALL_USER}" != "root" ]]; then
+    echo "[+] Local users can now access the OpenVPN Desk helper without extra group setup."
+fi

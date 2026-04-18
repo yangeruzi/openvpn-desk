@@ -5,6 +5,9 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib, Gdk
 
+APP_ID = "in.openvpndesk.app"
+APP_WM_CLASS = "in.openvpndesk.app"
+APP_ICON_NAME = "openvpn-desk"
 
 from openvpndesk.backend import VpnBackend, VpnBackendError
 
@@ -12,6 +15,8 @@ class YangzLinuxVpnClient(Gtk.Window):
 
     def __init__(self):
         super().__init__(title="Open VPN Desk Client")
+        self.set_wmclass(APP_WM_CLASS, APP_WM_CLASS)
+        self.set_icon_name(APP_ICON_NAME)
 
         # Force light theme (disable dark mode)
         settings = Gtk.Settings.get_default()
@@ -514,7 +519,7 @@ class YangzLinuxVpnClient(Gtk.Window):
 
 class OpenVPNDeskApp(Gtk.Application):
     def __init__(self):
-        super().__init__(application_id="in.openvpndesk.app")
+        super().__init__(application_id=APP_ID)
 
     def do_activate(self):
         win = YangzLinuxVpnClient()
@@ -527,6 +532,9 @@ class OpenVPNDeskApp(Gtk.Application):
 
 
 def main():
+    GLib.set_application_name("OpenVPN Desk")
+    GLib.set_prgname(APP_WM_CLASS)
+    Gdk.set_program_class(APP_WM_CLASS)
     app = OpenVPNDeskApp()
     app.run()
 
