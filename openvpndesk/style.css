@@ -73,6 +73,12 @@ treeview header button label {
     font-weight: 500;
 }
 
+.traffic-graph {
+    background-color: #f4f8ff;
+    border: 1px solid #d6e4ff;
+    border-radius: 10px;
+}
+
 /* Buttons */
 /* Base button styling */
 button {

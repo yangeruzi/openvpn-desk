@@ -1,5 +1,9 @@
 polkit.addRule(function(action, subject) {
-    if (action.id == "in.openvpndesk.helper" &&
+    var isHelperAction = action.id == "in.openvpndesk.helper";
+    var isPkexecHelper = action.id == "org.freedesktop.policykit.exec" &&
+        action.lookup("program") == "/usr/lib/openvpn-desk/helper.py";
+
+    if ((isHelperAction || isPkexecHelper) &&
             subject.active &&
             subject.local) {
         return polkit.Result.YES;

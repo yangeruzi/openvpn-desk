@@ -87,9 +87,9 @@ Creating auth files
 
 Managing the openvpn-desk systemd service
 
-Credentials and generated configs are stored in: ` /etc/openvpn-desk/profiles/ `
+Credentials are stored in: ` /etc/openvpn-desk/profiles/ `
 
-with root-only permissions
+Auth files remain root-only; profile configs are readable so the GUI can list them without repeated privilege prompts.
 
 No passwords are cached or logged by the GUI
 
@@ -216,4 +216,4 @@ If you install from source instead of the package:
 
 sudo ./helper/install.sh
 
-No extra group membership or re-login is required; local active users are allowed by polkit.
+No extra group membership or re-login is required; local active users are allowed by polkit, and the helper rule also matches pkexec's generic exec action for broader distro compatibility.

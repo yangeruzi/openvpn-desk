@@ -2,7 +2,7 @@
 set -e
 
 install -d -m755 -o root -g root /etc/openvpn-desk
-install -d -m700 -o root -g root /etc/openvpn-desk/profiles
+install -d -m755 -o root -g root /etc/openvpn-desk/profiles
 
 systemctl daemon-reload || true
 

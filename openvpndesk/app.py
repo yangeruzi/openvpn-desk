@@ -32,14 +32,16 @@ class YangzLinuxVpnClient(Gtk.Window):
         self.backend = VpnBackend()
         self.selected_profile = None
         self.active_profile = None
-
-
-        self._build_ui()
-        self.refresh_profiles()
         self.vpn_iface = None
         self.last_rx = None
         self.last_tx = None
         self.speed_timer_id = None
+        self.rx_history = []
+        self.tx_history = []
+        self.graph_history_limit = 48
+
+        self._build_ui()
+        self.refresh_profiles()
 
 
 
@@ -114,6 +116,13 @@ class YangzLinuxVpnClient(Gtk.Window):
         self.speed_label.set_xalign(0)
         self.speed_label.set_visible(False)
         vbox.pack_start(self.speed_label, False, False, 0)
+
+        self.graph_area = Gtk.DrawingArea()
+        self.graph_area.set_size_request(-1, 140)
+        self.graph_area.set_visible(False)
+        self.graph_area.connect("draw", self.on_graph_draw)
+        self.graph_area.get_style_context().add_class("traffic-graph")
+        vbox.pack_start(self.graph_area, False, False, 0)
 
         # label Styles
         self.status_label.get_style_context().add_class("status-label")
@@ -193,6 +202,106 @@ class YangzLinuxVpnClient(Gtk.Window):
             if iface.startswith("tun") or iface.startswith("tap"):
                 return iface
         return None
+
+    def reset_traffic_history(self):
+        self.vpn_iface = None
+        self.last_rx = None
+        self.last_tx = None
+        self.rx_history = []
+        self.tx_history = []
+        self.speed_label.set_text("")
+        self.speed_label.set_visible(False)
+        self.graph_area.set_visible(False)
+        if self.speed_timer_id is not None:
+            GLib.source_remove(self.speed_timer_id)
+            self.speed_timer_id = None
+        self.graph_area.queue_draw()
+
+    def append_traffic_sample(self, rx_rate, tx_rate):
+        self.rx_history.append(rx_rate)
+        self.tx_history.append(tx_rate)
+
+        if len(self.rx_history) > self.graph_history_limit:
+            self.rx_history = self.rx_history[-self.graph_history_limit:]
+        if len(self.tx_history) > self.graph_history_limit:
+            self.tx_history = self.tx_history[-self.graph_history_limit:]
+
+        self.graph_area.queue_draw()
+
+    def draw_series(self, cr, values, width, height, padding, scale, color):
+        if len(values) < 2:
+            return
+
+        usable_width = max(1, width - (padding * 2))
+        usable_height = max(1, height - (padding * 2))
+        step_x = usable_width / max(1, len(values) - 1)
+
+        cr.set_source_rgba(*color)
+        cr.set_line_width(2.2)
+
+        for index, value in enumerate(values):
+            x = padding + (index * step_x)
+            y = height - padding - ((value / scale) * usable_height)
+            if index == 0:
+                cr.move_to(x, y)
+            else:
+                cr.line_to(x, y)
+        cr.stroke()
+
+    def on_graph_draw(self, widget, cr):
+        allocation = widget.get_allocation()
+        width = allocation.width
+        height = allocation.height
+        padding = 14
+
+        cr.set_source_rgb(0.97, 0.98, 1.0)
+        cr.rectangle(0, 0, width, height)
+        cr.fill()
+
+        cr.set_source_rgb(0.84, 0.88, 0.94)
+        cr.set_line_width(1)
+        for step in range(1, 4):
+            y = padding + ((height - (padding * 2)) * step / 4.0)
+            cr.move_to(padding, y)
+            cr.line_to(width - padding, y)
+        cr.stroke()
+
+        max_rate = max(self.rx_history + self.tx_history, default=0.0)
+        scale = max(1.0, max_rate * 1.15)
+
+        self.draw_series(
+            cr, self.rx_history, width, height, padding, scale,
+            (0.13, 0.45, 0.95, 0.95)
+        )
+        self.draw_series(
+            cr, self.tx_history, width, height, padding, scale,
+            (0.09, 0.64, 0.29, 0.95)
+        )
+
+        cr.select_font_face("Sans", 0, 0)
+        cr.set_font_size(11)
+        cr.set_source_rgb(0.15, 0.23, 0.38)
+        cr.move_to(padding, 16)
+        cr.show_text("Download")
+        cr.move_to(width - 62, 16)
+        cr.show_text("Upload")
+
+        cr.set_source_rgb(0.13, 0.45, 0.95)
+        cr.rectangle(padding + 58, 8, 10, 10)
+        cr.fill()
+
+        cr.set_source_rgb(0.09, 0.64, 0.29)
+        cr.rectangle(width - 74, 8, 10, 10)
+        cr.fill()
+
+        cr.set_source_rgb(0.39, 0.47, 0.57)
+        cr.move_to(padding, height - 6)
+        if max_rate > 0:
+            cr.show_text(f"Peak {max_rate:.2f} Mbps")
+        else:
+            cr.show_text("Waiting for traffic...")
+
+        return False
 
     def render_status_dot(self, column, cell, model, iter, data=None):
         status = model.get_value(iter, 1)
@@ -380,23 +489,22 @@ class YangzLinuxVpnClient(Gtk.Window):
 
     def update_speed(self):
         if not self.vpn_iface:
+            self.speed_label.set_text("Detecting VPN interface...")
             return True  # keep timer alive
 
         rx, tx = self.read_iface_bytes(self.vpn_iface)
         if rx is None:
             return True
 
-        if not self.vpn_iface:
-            self.speed_label.set_text("Detecting VPN interface…")
-            return True
-
         if self.last_rx is not None:
-            rx_rate = (rx - self.last_rx) * 8 / 1_000_000
-            tx_rate = (tx - self.last_tx) * 8 / 1_000_000
+            rx_rate = max(0.0, (rx - self.last_rx) * 8 / 1_000_000)
+            tx_rate = max(0.0, (tx - self.last_tx) * 8 / 1_000_000)
 
             self.speed_label.set_text(
                 f"↓ {rx_rate:.2f} Mbps   ↑ {tx_rate:.2f} Mbps"
             )
+            self.graph_area.set_visible(True)
+            self.append_traffic_sample(rx_rate, tx_rate)
 
         self.last_rx = rx
         self.last_tx = tx
@@ -412,6 +520,7 @@ class YangzLinuxVpnClient(Gtk.Window):
         self.selected_profile = None
         self.active_profile = None
         self.status_label.set_text("Status: Unknown")
+        self.reset_traffic_history()
 
         try:
             profiles = self.backend.list_profiles()
@@ -441,19 +550,17 @@ class YangzLinuxVpnClient(Gtk.Window):
                 GLib.timeout_add_seconds(1, self._detect_iface_delayed)
                 self.last_rx = None
                 self.last_tx = None
+                self.rx_history = []
+                self.tx_history = []
                 self.speed_label.set_visible(True)
+                self.speed_label.set_text("Detecting VPN interface...")
                 if self.speed_timer_id is None:
                     self.speed_timer_id = GLib.timeout_add_seconds(1, self.update_speed)
 
             else:
                 self.active_profile = self.selected_profile
                 self.status_label.set_text(f"Status: Disconnected ({self.active_profile})")
-
-                self.vpn_iface = None
-                self.speed_label.set_visible(False)
-                if self.speed_timer_id is not None:
-                    GLib.source_remove(self.speed_timer_id)
-                    self.speed_timer_id = None
+                self.reset_traffic_history()
 
 
             # Update list dots
@@ -474,6 +581,7 @@ class YangzLinuxVpnClient(Gtk.Window):
             self.vpn_iface = iface
             self.last_rx = None
             self.last_tx = None
+            self.speed_label.set_text(f"Monitoring {iface}...")
             return False  # stop retrying
         return True  # retry again in 1 second
 

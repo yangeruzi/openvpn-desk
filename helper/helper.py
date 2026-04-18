@@ -79,8 +79,10 @@ def profile_paths(name: str):
 
 
 def ensure_layout():
-    OPENVPN_DESK_DIR.mkdir(mode=0o750, parents=True, exist_ok=True)
-    PROFILE_DIR.mkdir(mode=0o700, parents=True, exist_ok=True)
+    OPENVPN_DESK_DIR.mkdir(mode=0o755, parents=True, exist_ok=True)
+    PROFILE_DIR.mkdir(mode=0o755, parents=True, exist_ok=True)
+    OPENVPN_DESK_DIR.chmod(0o755)
+    PROFILE_DIR.chmod(0o755)
 
 
 def systemctl(args):

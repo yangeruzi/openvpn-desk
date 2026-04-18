@@ -12,7 +12,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "[+] Installing OpenVPN Desk helper"
 
 install -d -m755 -o root -g root /etc/openvpn-desk
-install -d -m700 -o root -g root /etc/openvpn-desk/profiles
+install -d -m755 -o root -g root /etc/openvpn-desk/profiles
 
 install -Dm755 "${SCRIPT_DIR}/helper.py" /usr/lib/openvpn-desk/helper.py
 install -Dm644 "${SCRIPT_DIR}/in.openvpndesk.helper.policy" /usr/share/polkit-1/actions/in.openvpndesk.helper.policy

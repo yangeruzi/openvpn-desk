@@ -7,10 +7,13 @@ if BASE_DIR not in sys.path:
 
 import json
 import subprocess
+from pathlib import Path
 from typing import List, Dict, Any
 
 
 HELPER_PATH = "/usr/lib/openvpn-desk/helper.py"
+PROFILE_DIR = Path("/etc/openvpn-desk/profiles")
+SERVICE_PREFIX = "openvpn-desk@"
 
 
 class VpnBackendError(Exception):
@@ -73,10 +76,15 @@ class VpnBackend:
     # -------------------------------------------------
 
     def list_profiles(self) -> List[str]:
-        resp = self._call_helper({
-            "action": "list_profiles"
-        })
-        return resp.get("profiles", [])
+        if not PROFILE_DIR.exists():
+            return []
+        try:
+            return sorted(path.stem for path in PROFILE_DIR.glob("*.conf"))
+        except OSError:
+            resp = self._call_helper({
+                "action": "list_profiles"
+            })
+            return resp.get("profiles", [])
 
     def install_profile(
         self,
@@ -106,11 +114,20 @@ class VpnBackend:
         })
 
     def get_status(self, profile_name: str) -> Dict[str, Any]:
-        resp = self._call_helper({
-            "action": "status",
-            "profile_name": profile_name
-        })
+        try:
+            proc = subprocess.run(
+                ["systemctl", "is-active", f"{SERVICE_PREFIX}{profile_name}"],
+                text=True,
+                capture_output=True
+            )
+        except FileNotFoundError:
+            raise VpnBackendError(
+                "SYSTEMCTL_NOT_FOUND",
+                "systemctl is not available on this system"
+            )
+
+        state = (proc.stdout or proc.stderr).strip() or "unknown"
         return {
-            "active": resp.get("active", False),
-            "state": resp.get("state", "unknown")
+            "active": state == "active",
+            "state": state
         }
